@@ -114,39 +114,39 @@ html = """<!DOCTYPE html>
             </div>
             <script type="text/javascript">
               window.addEventListener("DOMContentLoaded", function() {
-              let rownb = 8;
-              let colnb = 32;
-              let total = rownb * colnb;
-              let wrapperDiv = document.querySelectorAll(".wrapper")[0];
-              
-              for (let i = 0; i < total; i++) {
-                let currentcolnb = Math.floor(i / rownb);
-                let currentrownb = i% rownb;
-                let index = i + 1;
-                if( currentcolnb % 2 == 0){
-                  index = rownb*currentcolnb+ (rownb-currentrownb);
-                }
-                wrapperDiv.innerHTML += '<div class="box a" data-lednb="'+(total -index)+'">'+(total -index)+'</div>';
-                //wrapperDiv.innerHTML += '<div class="box a" data-lednb="'+i+'">'+index+"-"+(rownb-currentrownb)+"-"+currentrownb+"-"+currentcolnb % 2+'</div>';
-              }
-              
-              let boxes = document.querySelectorAll(".box");
-              Array.from(boxes, function(box) {
-                box.addEventListener("click", function() {
-                  //alert(this.classList[1]);
-                  this.classList.toggle("lightUp");
+                  let rownb = 8;
+                  let colnb = 32;
+                  let total = rownb * colnb;
+                  let wrapperDiv = document.querySelectorAll(".wrapper")[0];
                   
-                  let onLeds = document.querySelectorAll(".lightUp");
-                  let ledlist=[]; 
-                  for(let j=0; j < onLeds.length; j++){
-                    ledlist.push(onLeds[j].getAttribute("data-lednb"));
+                  for (let i = 0; i < total; i++) {
+                    let currentcolnb = Math.floor(i / rownb);
+                    let currentrownb = i% rownb;
+                    let index = i + 1;
+                    if( currentcolnb % 2 == 0){
+                      index = rownb*currentcolnb+ (rownb-currentrownb);
+                    }
+                    wrapperDiv.innerHTML += '<div class="box a" data-lednb="'+(total -index)+'">'+(total -index)+'</div>';
+                    //wrapperDiv.innerHTML += '<div class="box a" data-lednb="'+i+'">'+index+"-"+(rownb-currentrownb)+"-"+currentrownb+"-"+currentcolnb % 2+'</div>';
                   }
-                  let resultDiv = document.querySelectorAll(".result")[0];
-                  resultDiv.innerHTML = "<p>"+ledlist.join(",")+"</p>";
+                  
+                  let boxes = document.querySelectorAll(".box");
+                  Array.from(boxes, function(box) {
+                    box.addEventListener("click", function() {
+                      //alert(this.classList[1]);
+                      this.classList.toggle("lightUp");
+                      
+                      let onLeds = document.querySelectorAll(".lightUp");
+                      let ledlist=[]; 
+                      for(let j=0; j < onLeds.length; j++){
+                        ledlist.push(onLeds[j].getAttribute("data-lednb"));
+                      }
+                      let resultDiv = document.querySelectorAll(".result")[0];
+                      resultDiv.innerHTML = "<a href='/light/on?points="+ledlist.join(",")+"'>Switch on:"+ledlist.join(",")+"</a>";
+                    });
+                  });
                 });
-              });
-            });
-                        </script>
+            </script>
         </body>
     </html>
 """
@@ -185,7 +185,11 @@ led_strip = plasma.WS2812(NUM_LEDS2, 0, 0, plasma_stick.DAT, color_order=plasma.
 # Start updating the LED strip
 led_strip.start()
 
- 
+start = time.time()
+
+#default state
+stateON = True
+
 # Listen for connections
 while True:
     try:
@@ -204,18 +208,24 @@ while True:
         if led_on == 6:
             print("led on")
             intled.value(1)
+            stateON = True
             
-            SPEED = min(255, max(1, SPEED))
-            offset += float(SPEED) / 2000.0
+            if "?" in request:
+                print(request.split("?"))
+                params = request.split("?")[1]
+                if "&" in params:
+                    paramsList = params.split("&")
+                    print(paramsList)
+                    for i in range(len(paramsList)):
+                        if "points=" in paramsList[i] :
+                            print(paramsList[i])
+                            my_str = paramsList[i].split("=")[1]
+                else :
+                    my_str = params.split("=")[1]
+                print(my_str)
+                onLeds = [int(item) for item in my_str.split(",") if item.isdigit()]
+                print(len(onLeds))
 
-#             lightUp(frFlagWhite, yellow, 0.0)
-#             lightUp(frFlagRed, red, 1.0)
-#             lightUp(frFlagBlue, blue, 1.0)
-            for i in range(NUM_LEDS):
-                hue = float(i) / NUM_LEDS
-                led_strip.set_hsv(onLeds[i], hue + offset, 1.0, 1.0)
-
-            #time.sleep(1.0 / UPDATES)## need to wait for elapsed time logic
 
             stateis = "LED is ON"
             
@@ -223,8 +233,31 @@ while True:
             print("led off")
             intled.value(0)
             clearLights()
-                
+            stateON = False
             stateis = "LED is OFF"
+        
+#         todo : make asynchronous so we can have animated effects too
+        if stateON:
+            
+            SPEED = min(255, max(1, SPEED))
+            
+            if time.time() > start + 0.1:
+                start = time.time()
+                offset += float(SPEED) / 2000.0
+                print("Time elapsed: ", start, " - Offset: ", offset) # CPU seconds elapsed (floating point)
+            
+            offset += float(SPEED) / 2000.0
+                
+#             lightUp(frFlagWhite, yellow, 0.0)
+#             lightUp(frFlagRed, red, 1.0)
+#             lightUp(frFlagBlue, blue, 1.0)
+            for i in range(len(onLeds)):
+                hue = float(i) / len(onLeds)
+                led_strip.set_hsv(onLeds[i], hue + offset, 1.0, 1.0)
+
+            time.sleep(1.0 / UPDATES)## need to wait for elapsed time logic
+
+
      
         response = html + stateis
         
