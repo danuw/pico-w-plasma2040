@@ -15,6 +15,8 @@ So if you are interested in a quick way of drawing random patterns (or fonts), t
 
 You have 2 options for now.
 
+> Note: you will want to make sure you rename the script you interested in to `main.py`.
+
 ## Open 1 - manual setup
 
 In this scenario, connect to the codepen above (according to your screen size), select the boxes to light up, and copy paste that list into the `onLeds` array [here](https://github.com/danuw/pico-w-plasma2040/blob/main/hanukia.py#L10).
@@ -22,13 +24,18 @@ In this scenario, connect to the codepen above (according to your screen size), 
 ## Option 2 - Wed admin interface
 
 First you will need a file with your wifi credentials as shown here https://github.com/danuw/pico-w-plasma2040/blob/main/hanukia-webadmin.py#L51-L52
-You 
+
+If you are connected to your computer, you should get the IP address in the form of `192.168.0.x`. Connect to it and use the interface to set up the LED pattern and click the array to send it to the pi.
 
 # Bonus special FIFA World Cup?
 
 ... your very own score board :) (a bit of manual process still but will get to that next)
 
 https://github.com/danuw/pico-w-plasma2040/blob/main/fifaworldcup22.py
+
+#Wrapping up...
+
+Happy holidays...
 
 # Todo next
 
