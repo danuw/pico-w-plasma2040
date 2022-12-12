@@ -42,3 +42,9 @@ Happy holidays...
 - [X] inital web admin 
 - [ ] use async to ensure the rainbow pattern is animated
 - [ ] add images to the readme
+- [ ] allow to select a list of colours from a pallette, and select the patten that goes with them to display a complex gaphic from the web graphic
+- [ ] save patterns
+
+# Contributions
+
+Keen to contribute? Please feel free to propose PRs and tag me
